@@ -1,0 +1,21 @@
+{
+  "name": "ynor-vscode",
+  "displayName": "Ynor Language Support",
+  "description": "VSCode extension for Ynor files",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.60.0" },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [{
+      "id": "ynor",
+      "aliases": ["Ynor", "ynor"],
+      "extensions": [".ynor"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "ynor",
+      "scopeName": "source.ynor",
+      "path": "./syntaxes/ynor.tmLanguage.json"
+    }]
+  }
+}

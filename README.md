@@ -29,6 +29,20 @@ ynor-extension/
 │   └── utils/                     # Utility functions
 │       ├── helpers.js             # Helper functions
 │       └── constants.js           # Constants
+
+|___ packages/
+    │   ├── ynor-core/
+    │   ├── ynor-router/
+    │   ├── ynor-state/
+    │   ├── ynor-http/
+    │   ├── ynor-cli/
+    │   ├── ynor-compiler/
+    │   ├── ynor-loader/
+    │   ├── ynor-server/
+    │   ├── babel-plugin-transform-ynor/
+    │   ├── ynor-test-utils/
+    │   ├── eslint-plugin-ynor/
+    │   └── ynor-vscode/
 ├── ynor-runtime.js                # Ynor runtime (dev version)
 ├── ynor.config.js                 # Build configuration
 └── package.json                   # Project manifest
