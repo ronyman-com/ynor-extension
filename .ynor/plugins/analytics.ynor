@@ -1,0 +1,48 @@
+// Ynor Analytics Plugin
+export default {
+  install(Ynor, options) {
+    if (!options?.trackingId) {
+      console.error('Analytics tracking ID is required');
+      return;
+    }
+
+    // Load analytics script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${options.trackingId}`;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', options.trackingId);
+
+    // Add $ga instance to Ynor prototype
+    Ynor.prototype.$ga = {
+      trackEvent(category, action, label, value) {
+        if (window.gtag) {
+          gtag('event', action, {
+            event_category: category,
+            event_label: label,
+            value: value
+          });
+        }
+      },
+      
+      trackPageView(path) {
+        if (window.gtag) {
+          gtag('config', options.trackingId, {
+            page_path: path
+          });
+        }
+      }
+    };
+
+    // Auto-track route changes if router is available
+    if (Ynor.router) {
+      Ynor.router.afterEach((to) => {
+        Ynor.prototype.$ga.trackPageView(to.path);
+      });
+    }
+  }
+};

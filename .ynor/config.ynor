@@ -1,0 +1,85 @@
+# Ynor Core Configuration
+core:
+  version: '1.0.0'
+  env: 'development' # production | staging | test
+  defaultLocale: 'en-US'
+  fallbackLocale: 'en'
+  supportedLocales: ['en', 'es', 'fr', 'de']
+  ssr: false
+  legacy: false
+
+# Compiler Options
+compiler:
+  delimiters: ['{{', '}}']
+  directives:
+    if: 'v-if'
+    for: 'v-for'
+    bind: 'v-bind'
+    on: 'v-on'
+  minify: false
+  sourceMap: true
+  cache: true
+
+# Routing Configuration
+router:
+  mode: 'history' # hash | history
+  base: '/'
+  scrollBehavior: 'smooth'
+  routes:
+    - path: '/'
+      component: 'Home'
+    - path: '/about'
+      component: 'About'
+    - path: '/contact'
+      component: 'Contact'
+
+# State Management
+store:
+  modules:
+    auth:
+      namespaced: true
+      state: { user: null, token: null }
+    ui:
+      state: { theme: 'light', sidebarOpen: false }
+
+# Build Configuration
+build:
+  outputDir: './dist'
+  assetsDir: 'assets'
+  filenameHashing: true
+  chunkFilename: '[name].[contenthash].js'
+  css:
+    extract: true
+    sourceMap: true
+    loaderOptions:
+      scss:
+        additionalData: '@import "@/styles/variables.scss";'
+
+# Development Server
+devServer:
+  port: 8080
+  host: 'localhost'
+  https: false
+  open: true
+  hot: true
+  proxy:
+    '/api':
+      target: 'https://api.ynor.dev'
+      changeOrigin: true
+
+# Plugins Configuration
+plugins:
+  - name: 'ynor-i18n'
+    options:
+      locales: './locales'
+  - name: 'ynor-analytics'
+    options:
+      trackingId: 'UA-XXXXX-Y'
+  - name: 'ynor-auth'
+    options:
+      strategies:
+        local:
+          endpoints:
+            login: { url: '/auth/login', method: 'post' }
+            logout: { url: '/auth/logout', method: 'post' }
+            user: { url: '/auth/user', method: 'get' }

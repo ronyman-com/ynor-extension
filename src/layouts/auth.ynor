@@ -1,0 +1,71 @@
+<template>
+  <div class="auth-layout">
+    <div class="auth-container">
+      <div class="auth-brand">
+        <img src="/assets/logo.svg" alt="Ynor Logo">
+        <h1>Welcome Back</h1>
+      </div>
+      
+      <div class="auth-content">
+        <slot></slot>
+      </div>
+      
+      <div class="auth-footer">
+        <p v-if="type === 'login'">
+          Don't have an account? <a href="/register">Register</a>
+        </p>
+        <p v-else>
+          Already have an account? <a href="/login">Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    type: {
+      type: String,
+      validator: (value) => ['login', 'register'].includes(value),
+      default: 'login'
+    }
+  }
+};
+</script>
+
+<style scoped>
+.auth-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-brand img {
+  height: 60px;
+  margin-bottom: 1rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+</style>

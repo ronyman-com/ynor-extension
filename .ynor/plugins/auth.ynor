@@ -1,0 +1,112 @@
+// Ynor Auth Plugin
+export default {
+  install(Ynor, options) {
+    if (!options?.strategies) {
+      console.error('Auth strategies configuration is required');
+      return;
+    }
+
+    const strategies = options.strategies;
+    const storageKey = 'ynor_auth';
+
+    // Add $auth instance to Ynor prototype
+    Ynor.prototype.$auth = {
+      user: null,
+      token: null,
+      strategy: null,
+
+      async login(credentials, strategyName = 'local') {
+        const strategy = strategies[strategyName];
+        if (!strategy) {
+          throw new Error(`Strategy ${strategyName} not found`);
+        }
+
+        try {
+          const response = await Ynor.http({
+            url: strategy.endpoints.login.url,
+            method: strategy.endpoints.login.method,
+            data: credentials
+          });
+
+          this.token = response.data.token;
+          this.strategy = strategyName;
+          
+          // Store auth state
+          localStorage.setItem(storageKey, JSON.stringify({
+            token: this.token,
+            strategy: this.strategy
+          }));
+
+          // Fetch user data
+          await this.fetchUser();
+          
+          return response;
+        } catch (error) {
+          this.logout();
+          throw error;
+        }
+      },
+
+      async fetchUser() {
+        if (!this.token || !this.strategy) return null;
+        
+        const strategy = strategies[this.strategy];
+        const response = await Ynor.http({
+          url: strategy.endpoints.user.url,
+          method: strategy.endpoints.user.method,
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        });
+
+        this.user = response.data;
+        return this.user;
+      },
+
+      logout() {
+        this.user = null;
+        this.token = null;
+        this.strategy = null;
+        localStorage.removeItem(storageKey);
+      },
+
+      init() {
+        const authData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        if (authData.token && authData.strategy) {
+          this.token = authData.token;
+          this.strategy = authData.strategy;
+          return this.fetchUser();
+        }
+        return Promise.resolve(null);
+      }
+    };
+
+    // Add auth mixin
+    Ynor.mixin({
+      created() {
+        if (this.$options.auth) {
+          this.$auth.init().then(user => {
+            if (this.$options.auth === 'guest' && user) {
+              this.$router.push('/');
+            } else if (this.$options.auth === true && !user) {
+              this.$router.push('/login');
+            }
+          });
+        }
+      }
+    });
+
+    // Add auth route guard
+    if (Ynor.router) {
+      Ynor.router.beforeEach((to, from, next) => {
+        if (to.meta.auth && !this.$auth.user) {
+          next('/login');
+        } else if (to.meta.guest && this.$auth.user) {
+          next('/');
+        } else {
+          next();
+        }
+      });
+    }
+  }
+};

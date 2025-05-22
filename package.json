@@ -1,0 +1,24 @@
+{
+  "name": "ynor-extension",
+  "version": "1.0.0",
+  "description": "ynor extension makes your browser friendly.",
+  "main": "ynor-runtime.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronyman-com/ynor-extension.git"
+  },
+  "keywords": [
+    "ynor",
+    "ynor-html-extention",
+    "ronyman"
+  ],
+  "author": "Rony MAN",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ronyman-com/ynor-extension/issues"
+  },
+  "homepage": "https://github.com/ronyman-com/ynor-extension#readme"
+}

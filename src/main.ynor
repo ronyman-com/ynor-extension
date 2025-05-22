@@ -1,0 +1,55 @@
+// In your main.ynor file
+import i18n from '../.ynor/plugins/i18n.ynor';
+import analytics from '../.ynor/plugins/analytics.ynor';
+import auth from '../.ynor/plugins/auth.ynor';
+
+const app = new Ynor({
+  // ... config
+});
+
+app.use(i18n, {
+  locales: {
+    'en-US': {
+      welcome: 'Welcome',
+      greeting: 'Hello, {name}!'
+    }
+  }
+});
+
+app.use(analytics, {
+  trackingId: 'UA-123456-1'
+});
+
+app.use(auth, {
+  strategies: {
+    local: {
+      endpoints: {
+        login: { url: '/api/auth/login', method: 'post' },
+        logout: { url: '/api/auth/logout', method: 'post' },
+        user: { url: '/api/auth/user', method: 'get' }
+      }
+    }
+  }
+});
+
+<template>
+  <App />
+</template>
+
+<script>
+import App from './app.ynor';
+import { store } from './utils/store';
+
+export default {
+  components: { App },
+  created() {
+    // Initialize global state
+    store.dispatch('fetchUser', 123);
+    
+    // Watch for theme changes
+    store.subscribe('theme', (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+    });
+  }
+};
+</script>

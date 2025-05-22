@@ -1,0 +1,55 @@
+<template>
+  <div class="admin-layout">
+    <AdminSidebar :nav-items="navItems" />
+    
+    <div class="admin-main">
+      <AdminToolbar :user="user" />
+      
+      <div class="admin-content">
+        <slot></slot>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import AdminSidebar from '../components/admin/Sidebar.ynor';
+import AdminToolbar from '../components/admin/Toolbar.ynor';
+
+export default {
+  components: { AdminSidebar, AdminToolbar },
+  data() {
+    return {
+      user: null,
+      navItems: [
+        { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
+        { icon: 'users', label: 'Users', path: '/admin/users' },
+        { icon: 'settings', label: 'Settings', path: '/admin/settings' }
+      ]
+    };
+  },
+  async created() {
+    // Load admin user data
+    this.user = await this.$api.get('/admin/me');
+  }
+};
+</script>
+
+<style scoped>
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  background: var(--admin-bg);
+}
+</style>

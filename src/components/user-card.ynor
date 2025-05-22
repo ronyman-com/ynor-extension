@@ -1,0 +1,52 @@
+<template>
+  <div class="user-card">
+    <img :src="user.avatar" alt="User avatar">
+    <div class="user-info">
+      <h3>{{ user.name }}</h3>
+      <p>{{ user.bio }}</p>
+      <button @click="sendMessage">Message</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    user: {
+      type: Object,
+      required: true,
+      validator: (value) => {
+        return 'name' in value && 'avatar' in value;
+      }
+    }
+  },
+  methods: {
+    sendMessage() {
+      this.$emit('message', this.user.id);
+    }
+  }
+};
+</script>
+
+<style scoped>
+.user-card {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+}
+
+.user-info {
+  margin-left: 16px;
+}
+
+button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+</style>

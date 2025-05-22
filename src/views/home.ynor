@@ -1,0 +1,22 @@
+<template>
+  <section class="home">
+    <h2>Welcome to Ynor</h2>
+    <p>{{ greeting }}</p>
+    <button @click="changeGreeting">Click me</button>
+  </section>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      greeting: "This is the future of web templating"
+    };
+  },
+  methods: {
+    changeGreeting() {
+      this.greeting = "You clicked the button!";
+    }
+  }
+};
+</script>

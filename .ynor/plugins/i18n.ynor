@@ -1,0 +1,50 @@
+// Ynor i18n Plugin
+export default {
+  install(Ynor, options) {
+    const locales = options?.locales || {};
+    const currentLocale = Ynor.config.core.defaultLocale;
+
+    // Add $i18n instance to Ynor prototype
+    Ynor.prototype.$i18n = {
+      locales,
+      currentLocale,
+      
+      setLocale(locale) {
+        if (!Ynor.config.core.supportedLocales.includes(locale)) {
+          console.warn(`Locale ${locale} is not supported`);
+          return;
+        }
+        this.currentLocale = locale;
+        document.documentElement.lang = locale;
+      },
+
+      t(key, params = {}) {
+        const keys = key.split('.');
+        let translation = this.locales[this.currentLocale];
+        
+        for (const k of keys) {
+          if (!translation[k]) {
+            console.warn(`Missing translation for key: ${key}`);
+            return key;
+          }
+          translation = translation[k];
+        }
+
+        // Simple parameter replacement
+        return Object.entries(params).reduce((result, [param, value]) => {
+          return result.replace(new RegExp(`\\{${param}\\}`, 'g'), value);
+        }, translation);
+      }
+    };
+
+    // Add i18n directive
+    Ynor.directive('t', {
+      bind(el, binding) {
+        el.textContent = Ynor.prototype.$i18n.t(binding.value);
+      },
+      update(el, binding) {
+        el.textContent = Ynor.prototype.$i18n.t(binding.value);
+      }
+    });
+  }
+};
