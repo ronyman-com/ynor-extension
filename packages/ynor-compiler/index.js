@@ -1,22 +1,52 @@
-const { parse } = require('@babel/parser');
-const generate = require('@babel/generator').default;
-
 class YnorCompiler {
   compile(source) {
-    const ast = parse(source, {
-      sourceType: 'module',
-      plugins: ['jsx']
-    });
+    // Parse the .ynor file structure
+    const templateMatch = source.match(/<template>([\s\S]*?)<\/template>/);
+    const scriptMatch = source.match(/<script>([\s\S]*?)<\/script>/);
+    const styleMatch = source.match(/<style>([\s\S]*?)<\/style>/);
 
-    // Transform AST here
-    const output = generate(ast, {
-      retainLines: true,
-      compact: false
-    });
+    if (!templateMatch) {
+      throw new Error('No template found in .ynor file');
+    }
+
+    const template = templateMatch[1].trim();
+    const script = scriptMatch ? scriptMatch[1].trim() : 'export default {}';
+    const styles = styleMatch ? styleMatch[1].trim() : '';
+
+    // Generate the output code
+    const output = `
+      ${script}
+      const __template = ${JSON.stringify(template)};
+      const __styles = ${JSON.stringify(styles)};
+      
+     
+      if (__styles) {
+        const styleEl = document.createElement('style');
+        styleEl.textContent = __styles;
+        document.head.appendChild(styleEl);
+      }
+      
+      
+      export const render = (el, data) => {
+        const runtime = new (require('ynor-runtime'))();
+        el.innerHTML = runtime.render({
+          ...exports.default,
+          template: __template,
+          data
+        });
+      };
+      
+     
+      export default {
+        ...exports.default,
+        template: __template,
+        styles: __styles
+      };
+    `;
 
     return {
-      code: output.code,
-      map: output.map
+      code: output,
+      map: null // Add source map generation if needed
     };
   }
 }

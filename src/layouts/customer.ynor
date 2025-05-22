@@ -1,0 +1,65 @@
+<template>
+  <div class="customer-layout">
+    <CustomerHeader :user="user" />
+    
+    <div class="customer-main">
+      <CustomerNav :links="navLinks" />
+      
+      <div class="content">
+        <slot></slot>
+      </div>
+    </div>
+    
+    <CustomerFooter />
+  </div>
+</template>
+
+<script>
+import CustomerHeader from '../components/customer/Header.ynor';
+import CustomerNav from '../components/customer/Nav.ynor';
+import CustomerFooter from '../components/customer/Footer.ynor';
+
+export default {
+  components: { CustomerHeader, CustomerNav, CustomerFooter },
+  data() {
+    return {
+      user: null,
+      navLinks: [
+        { icon: 'home', label: 'Dashboard', path: '/dashboard' },
+        { icon: 'wallet', label: 'Accounts', path: '/accounts' },
+        { icon: 'exchange-alt', label: 'Transfer', path: '/transfer' },
+        { icon: 'credit-card', label: 'Payments', path: '/payments' },
+        { icon: 'cog', label: 'Settings', path: '/settings' }
+      ]
+    };
+  },
+  async created() {
+    this.user = await this.$api.get('/customer/me');
+  }
+};
+</script>
+
+<style scoped>
+.customer-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.customer-main {
+  display: flex;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background: var(--customer-bg);
+}
+
+@media (max-width: 768px) {
+  .customer-main {
+    flex-direction: column;
+  }
+}
+</style>

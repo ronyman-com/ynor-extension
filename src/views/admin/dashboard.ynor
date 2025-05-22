@@ -1,0 +1,231 @@
+<template>
+  <AdminLayout>
+    <template #header>
+      <h1>Admin Dashboard</h1>
+      <div class="admin-stats">
+        <StatCard 
+          title="Total Users" 
+          value="{{ stats.total_users }}" 
+          icon="users"
+          trend="{{ stats.user_growth }}"
+        />
+        <StatCard 
+          title="Revenue" 
+          value="{{ stats.revenue | money }}" 
+          icon="dollar-sign"
+          trend="{{ stats.revenue_growth }}"
+        />
+        <StatCard 
+          title="Orders" 
+          value="{{ stats.total_orders }}" 
+          icon="shopping-cart"
+          trend="{{ stats.order_growth }}"
+        />
+      </div>
+    </template>
+
+    <div class="admin-content">
+      <div class="row">
+        <div class="col-md-8">
+          <ChartCard title="Sales Analytics">
+            <LineChart :data="salesChartData" />
+          </ChartCard>
+        </div>
+        <div class="col-md-4">
+          <ChartCard title="Traffic Sources">
+            <PieChart :data="trafficChartData" />
+          </ChartCard>
+        </div>
+      </div>
+
+      <DataTable
+        title="Recent Orders"
+        :columns="orderColumns"
+        :data="recentOrders"
+        :actions="orderActions"
+      >
+        <template #status="{ row }">
+          <Badge :type="row.status | statusColor">
+            {{ row.status | capitalize }}
+          </Badge>
+        </template>
+      </DataTable>
+
+      <QuickActions>
+        <ActionButton 
+          icon="plus" 
+          @click="showUserModal"
+        >
+          Add User
+        </ActionButton>
+        <ActionButton 
+          icon="download" 
+          @click="exportReports"
+        >
+          Export
+        </ActionButton>
+        <ActionButton 
+          icon="settings" 
+          @click="openSettings"
+        >
+          Settings
+        </ActionButton>
+      </QuickActions>
+    </div>
+
+    <UserModal 
+      v-if="showUserForm" 
+      @close="hideUserModal"
+      @save="handleUserSave"
+    />
+  </AdminLayout>
+</template>
+
+<script>
+import AdminLayout from '../../layouts/admin.ynor';
+import StatCard from '../../components/admin/StatCard.ynor';
+import ChartCard from '../../components/admin/ChartCard.ynor';
+import DataTable from '../../components/admin/DataTable.ynor';
+import QuickActions from '../../components/admin/QuickActions.ynor';
+import UserModal from '../../components/admin/UserModal.ynor';
+import { LineChart, PieChart } from '../../components/charts';
+import Badge from '../../components/ui/Badge.ynor';
+
+export default {
+  components: {
+    AdminLayout,
+    StatCard,
+    ChartCard,
+    DataTable,
+    QuickActions,
+    UserModal,
+    LineChart,
+    PieChart,
+    Badge
+  },
+  data() {
+    return {
+      showUserForm: false,
+      stats: {
+        total_users: 0,
+        user_growth: 0,
+        revenue: 0,
+        revenue_growth: 0,
+        total_orders: 0,
+        order_growth: 0
+      },
+      orderColumns: [
+        { field: 'id', label: 'Order ID' },
+        { field: 'customer', label: 'Customer' },
+        { field: 'date', label: 'Date' },
+        { field: 'amount', label: 'Amount' },
+        { field: 'status', label: 'Status' }
+      ],
+      recentOrders: [],
+      orderActions: [
+        { label: 'View', handler: this.viewOrder },
+        { label: 'Edit', handler: this.editOrder }
+      ]
+    };
+  },
+  filters: {
+    statusColor(status) {
+      const map = {
+        'completed': 'success',
+        'pending': 'warning',
+        'cancelled': 'danger'
+      };
+      return map[status] || 'info';
+    },
+    money(value) {
+      return '$' + value.toFixed(2);
+    }
+  },
+  computed: {
+    salesChartData() {
+      return {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Sales',
+          data: [12000, 19000, 3000, 5000, 2000, 3000],
+          borderColor: '#4e73df'
+        }]
+      };
+    },
+    trafficChartData() {
+      return {
+        labels: ['Direct', 'Social', 'Referral'],
+        datasets: [{
+          data: [55, 30, 15],
+          backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']
+        }]
+      };
+    }
+  },
+  methods: {
+    showUserModal() {
+      this.showUserForm = true;
+    },
+    hideUserModal() {
+      this.showUserForm = false;
+    },
+    handleUserSave(user) {
+      // API call to save user
+      this.hideUserModal();
+    },
+    viewOrder(order) {
+      this.$router.push(`/admin/orders/${order.id}`);
+    },
+    editOrder(order) {
+      this.$router.push(`/admin/orders/${order.id}/edit`);
+    },
+    exportReports() {
+      // Export logic
+    },
+    openSettings() {
+      this.$router.push('/admin/settings');
+    },
+    async fetchDashboardData() {
+      const data = await this.$api.get('/admin/dashboard');
+      this.stats = data.stats;
+      this.recentOrders = data.recent_orders;
+    }
+  },
+  created() {
+    this.fetchDashboardData();
+  }
+};
+</script>
+
+<style scoped>
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.admin-content {
+  padding: 1.5rem;
+  background: var(--admin-bg-light);
+  border-radius: 0.35rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -0.75rem;
+}
+
+.col-md-8 {
+  flex: 0 0 66.66667%;
+  max-width: 66.66667%;
+  padding: 0 0.75rem;
+}
+
+.col-md-4 {
+  flex: 0 0 33.33333%;
+  max-width: 33.33333%;
+  padding: 0 0.75rem;
+}
+</style>

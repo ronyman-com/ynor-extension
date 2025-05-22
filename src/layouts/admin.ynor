@@ -24,12 +24,13 @@ export default {
       navItems: [
         { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
         { icon: 'users', label: 'Users', path: '/admin/users' },
-        { icon: 'settings', label: 'Settings', path: '/admin/settings' }
+        { icon: 'shopping-cart', label: 'Orders', path: '/admin/orders' },
+        { icon: 'chart-line', label: 'Reports', path: '/admin/reports' },
+        { icon: 'cog', label: 'Settings', path: '/admin/settings' }
       ]
     };
   },
   async created() {
-    // Load admin user data
     this.user = await this.$api.get('/admin/me');
   }
 };

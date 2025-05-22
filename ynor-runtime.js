@@ -123,6 +123,28 @@ class Ynor {
     }
   }
 }
+////////////////////////////////////////////// add more functions
+class YnorRuntime {
+  render(component) {
+    const context = {
+      ...component.data,
+      $emit: (event, ...args) => {
+        // Handle events
+      }
+    };
+    
+    // Simple template interpolation
+    return component.template.replace(/\{\{(.*?)\}\}/g, (_, expr) => {
+      try {
+        with(context) return eval(expr.trim());
+      } catch {
+        return '';
+      }
+    });
+  }
+}
 
+module.exports = YnorRuntime;
+//////////////////////////////////////////////
 // Global registration
 window.Ynor = Ynor;

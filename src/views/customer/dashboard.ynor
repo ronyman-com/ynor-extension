@@ -1,0 +1,214 @@
+<template>
+  <CustomerLayout>
+    <template #header>
+      <h1>My Dashboard</h1>
+      <div class="welcome-message">
+        <p>Welcome back, {{ user.name }}!</p>
+        <p>Member since {{ user.join_date | date }}</p>
+      </div>
+    </template>
+
+    <div class="customer-content">
+      <div class="account-summary">
+        <div class="balance-card">
+          <h3>Account Balance</h3>
+          <div class="amount">{{ account.balance | money }}</div>
+          <div class="actions">
+            <Button @click="showDepositModal">Deposit</Button>
+            <Button @click="showWithdrawModal">Withdraw</Button>
+          </div>
+        </div>
+
+        <div class="quick-links">
+          <h3>Quick Actions</h3>
+          <div class="links">
+            <LinkCard 
+              icon="credit-card"
+              title="Pay Bills"
+              @click="navigateTo('/payments')"
+            />
+            <LinkCard 
+              icon="exchange-alt"
+              title="Transfer"
+              @click="navigateTo('/transfer')"
+            />
+            <LinkCard 
+              icon="history"
+              title="Transaction History"
+              @click="navigateTo('/transactions')"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-activity">
+        <h3>Recent Activity</h3>
+        <ActivityList :activities="recentActivities" />
+      </div>
+
+      <div class="notifications">
+        <h3>Notifications</h3>
+        <NotificationList 
+          :notifications="notifications"
+          @dismiss="dismissNotification"
+        />
+      </div>
+    </div>
+
+    <DepositModal 
+      v-if="showDeposit" 
+      @close="hideDepositModal"
+      @complete="handleDeposit"
+    />
+    
+    <WithdrawModal 
+      v-if="showWithdraw" 
+      @close="hideWithdrawModal"
+      @complete="handleWithdraw"
+    />
+  </CustomerLayout>
+</template>
+
+<script>
+import CustomerLayout from '../../layouts/customer.ynor';
+import Button from '../../components/ui/Button.ynor';
+import LinkCard from '../../components/customer/LinkCard.ynor';
+import ActivityList from '../../components/customer/ActivityList.ynor';
+import NotificationList from '../../components/customer/NotificationList.ynor';
+import DepositModal from '../../components/customer/DepositModal.ynor';
+import WithdrawModal from '../../components/customer/WithdrawModal.ynor';
+
+export default {
+  components: {
+    CustomerLayout,
+    Button,
+    LinkCard,
+    ActivityList,
+    NotificationList,
+    DepositModal,
+    WithdrawModal
+  },
+  data() {
+    return {
+      showDeposit: false,
+      showWithdraw: false,
+      user: {
+        name: '',
+        email: '',
+        join_date: ''
+      },
+      account: {
+        balance: 0,
+        number: '',
+        type: ''
+      },
+      recentActivities: [],
+      notifications: []
+    };
+  },
+  filters: {
+    money(value) {
+      return '$' + value.toFixed(2);
+    },
+    date(value) {
+      return new Date(value).toLocaleDateString();
+    }
+  },
+  methods: {
+    showDepositModal() {
+      this.showDeposit = true;
+    },
+    hideDepositModal() {
+      this.showDeposit = false;
+    },
+    showWithdrawModal() {
+      this.showWithdraw = true;
+    },
+    hideWithdrawModal() {
+      this.showWithdraw = false;
+    },
+    handleDeposit(amount) {
+      // API call to process deposit
+      this.account.balance += amount;
+      this.hideDepositModal();
+    },
+    handleWithdraw(amount) {
+      // API call to process withdrawal
+      this.account.balance -= amount;
+      this.hideWithdrawModal();
+    },
+    dismissNotification(id) {
+      this.notifications = this.notifications.filter(n => n.id !== id);
+    },
+    navigateTo(path) {
+      this.$router.push(path);
+    },
+    async fetchCustomerData() {
+      const data = await this.$api.get('/customer/dashboard');
+      this.user = data.user;
+      this.account = data.account;
+      this.recentActivities = data.recent_activities;
+      this.notifications = data.notifications;
+    }
+  },
+  created() {
+    this.fetchCustomerData();
+  }
+};
+</script>
+
+<style scoped>
+.welcome-message {
+  margin-bottom: 2rem;
+}
+
+.customer-content {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+.account-summary {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+.balance-card {
+  background: var(--primary-color);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.balance-card .amount {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.balance-card .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.quick-links .links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.recent-activity,
+.notifications {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+  .account-summary {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
